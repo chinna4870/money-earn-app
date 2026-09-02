@@ -1,0 +1,14 @@
+{
+  "name": "money-earn-app",
+  "version": "1.0.0",
+  "description": "Money Earning Web App - Ad Watch & Earn",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "bcryptjs": "^2.4.3"
+  }
+}
