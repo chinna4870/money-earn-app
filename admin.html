@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body { background: #121212; color: #fff; padding: 15px; }
+h1 { color: #FFD700; margin-bottom: 15px; font-size: 22px; }
+.card { background: #1e1e1e; border-radius: 10px; padding: 15px; margin-bottom: 12px; border: 1px solid #333; }
+input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; margin-bottom: 10px; font-size: 16px; }
+button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #FFD700; color: #000; font-weight: bold; font-size: 16px; cursor: pointer; }
+.approve { background: #4CAF50; color: #fff; margin-top: 8px; }
+.user { color: #fff; font-size: 16px; }
+.amount { color: #FFD700; font-weight: bold; font-size: 18px; }
+.upi { color: #aaa; font-size: 14px; margin-top: 4px; }
+.empty { color: #888; text-align: center; padding: 30px 0; }
+</style>
+</head>
+<body>
+<h1>🛡️ Admin Panel — Withdraw Approvals</h1>
+<div id="content"><div class="empty">లోడ్ అవుతోంది...</div></div>
+
+<script>
+async function loadWithdrawals() {
+  try {
+    const r = await fetch('/api/admin/withdrawals');
+    const d = await r.json();
+    if (!d.success) { document.getElementById('content').innerHTML = '<div class="empty">❌ లాగిన్ చెయ్యండి</div>'; return; }
+    if (d.pending.length === 0) { document.getElementById('content').innerHTML = '<div class="empty">✅ పెండింగ్ విత్‌డ్రాల్స్ లేవు</div>'; return; }
+    let html = '';
+    d.pending.forEach(w => {
+      html += `<div class="card">
+        <div class="user">👤 ${w.username}</div>
+        <div class="amount">₹${w.amount}</div>
+        <div class="upi">📱 UPI: ${w.upi}</div>
+        <button class="approve" onclick="approveWithdraw('${w.id}')">✅ Approve చెయ్యి</button>
+      </div>`;
+    });
+    document.getElementById('content').innerHTML = html;
+  } catch(e) { document.getElementById('content').innerHTML = '<div class="empty">❌ ఎర్రర్</div>'; }
+}
+
+async function approveWithdraw(id) {
+  await fetch('/api/admin/approve', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+  loadWithdrawals();
+}
+
+loadWithdrawals();
+</script>
+</body>
+</html>
