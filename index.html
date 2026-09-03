@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earn App — Ad చూడు డబ్బు సంపాదించు</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body { background: #121212; color: #fff; padding: 15px; }
+h1 { color: #FFD700; font-size: 20px; margin-bottom: 15px; }
+.card { background: #1e1e1e; border-radius: 10px; padding: 15px; margin-bottom: 12px; border: 1px solid #333; }
+.balance { color: #FFD700; font-size: 28px; font-weight: bold; }
+input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; margin-bottom: 10px; font-size: 16px; }
+button { width: 100%; padding: 14px; border-radius: 8px; border: none; background: #FFD700; color: #000; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 8px; }
+.green { background: #4CAF50; color: #fff; }
+.watch { background: #2196F3; color: #fff; }
+.user { color: #aaa; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>💰 Earn App — డబ్బు సంపాదించు</h1>
+
+<div id="app"></div>
+
+<script>
+let app = document.getElementById('app');
+
+async function checkLogin() {
+  try {
+    const r = await fetch('/api/user');
+    const d = await r.json();
+    if (d.success) showHome(d);
+    else showLogin();
+  } catch(e) { showLogin(); }
+}
+
+function showLogin() {
+  app.innerHTML = `<div class="card">
+    <h1>🔐 లాగిన్ / రిజిస్టర్</h1>
+    <input id="user" placeholder="యూజర్ పేరు">
+    <input id="pass" type="password" placeholder="పాస్‌వర్డ్">
+    <button onclick="doRegister()">🆕 రిజిస్టర్</button>
+    <button class="green" onclick="doLogin()">🔓 లాగిన్</button>
+  </div>`;
+}
+
+async function doRegister() {
+  const u = document.getElementById('user').value;
+  const p = document.getElementById('pass').value;
+  const r = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p}) });
+  const d = await r.json();
+  if (d.success) showHome(d); else alert(d.message);
+}
+
+async function doLogin() {
+  const u = document.getElementById('user').value;
+  const p = document.getElementById('pass').value;
+  const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p}) });
+  const d = await r.json();
+  if (d.success) showHome(d); else alert(d.message);
+}
+
+function showHome(d) {
+  app.innerHTML = `<div class="card">
+    <div class="user">👤 హాయ్, ${d.username}!</div>
+    <div>💰 బ్యాలెన్స్: <span class="balance">₹${d.balance}</span></div>
+  </div>
+  <div class="card">
+    <h1>📺 Ad చూడు — ₹0.50 సంపాదించు</h1>
+    <button class="watch" onclick="watchAd()">▶️ Ad చూడు</button>
+  </div>
+  <div class="card">
+    <h1>💸 డబ్బు తీసుకో (Withdraw)</h1>
+    <input id="wdAmt" type="number" placeholder="మొత్తం (₹)">
+    <input id="wdUpi" placeholder="మీ UPI ID">
+    <button class="green" onclick="doWithdraw()">💸 Withdraw చెయ్యి</button>
+  </div>`;
+}
+
+async function watchAd() {
+  const r = await fetch('/api/watch-ad', { method:'POST' });
+  const d = await r.json();
+  if (d.success) { alert('✅ ₹0.50 జమ అయ్యింది!'); checkLogin(); } else alert(d.message);
+}
+
+async function doWithdraw() {
+  const a = document.getElementById('wdAmt').value;
+  const u = document.getElementById('wdUpi').value;
+  const r = await fetch('/api/withdraw', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({amount:a, upi:u}) });
+  const d = await r.json();
+  if (d.success) alert('✅ Withdraw రిక్వెస్ట్ పంపించావ్! Admin approve చెయ్యగానే డబ్బు వస్తుంది.'); else alert(d.message);
+}
+
+checkLogin();
+</script>
+</body>
+</html>
